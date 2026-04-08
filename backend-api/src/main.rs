@@ -38,9 +38,9 @@ async fn main() {
         .merge(order_routes())
         .with_state(state);
 
-    println!("Server running at http://localhost:3000");
+    println!("Server running at http://localhost:3001");
 
-    let listener = TcpListener::bind("0.0.0.0:3000").await.unwrap();
+    let listener = TcpListener::bind("0.0.0.0:3001").await.unwrap();
     axum::serve(listener, app).await.unwrap();
 }
 

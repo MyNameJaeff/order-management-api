@@ -36,7 +36,7 @@ cargo run
 Server will start at:
 
 ```
-http://localhost:3000
+http://localhost:3001
 ```
 
 ---
