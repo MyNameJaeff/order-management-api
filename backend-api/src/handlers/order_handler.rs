@@ -5,9 +5,14 @@ use crate::services::order_service;
 use crate::models::order::{Order, OrderStatus};
 
 #[derive(serde::Deserialize)]
-pub struct CreateOrderRequest {
+pub struct CreateOrderItemRequest {
     pub product_id: Uuid,
     pub quantity: i32,
+}
+
+#[derive(serde::Deserialize)]
+pub struct CreateOrderRequest {
+    pub items: Vec<CreateOrderItemRequest>,
 }
 
 #[derive(serde::Deserialize)]
@@ -19,7 +24,18 @@ pub async fn create_order_handler(
     State(state): State<AppState>,
     Json(payload): Json<CreateOrderRequest>,
 ) -> (StatusCode, Json<Option<Order>>) {
-    match order_service::create_order(&state.order_repo, &state.product_repo, payload.product_id, payload.quantity) {
+    match order_service::create_order(
+        &state.order_repo,
+        &state.product_repo,
+        payload
+            .items
+            .into_iter()
+            .map(|i| order_service::CreateOrderItemInput {
+                product_id: i.product_id,
+                quantity: i.quantity,
+            })
+            .collect(),
+    ) {
         Ok(order) => (StatusCode::CREATED, Json(Some(order))),
         Err(_) => (StatusCode::BAD_REQUEST, Json(None)),
     }
@@ -55,7 +71,8 @@ pub async fn update_order_status_handler(
 ) -> (StatusCode, Json<Option<Order>>) {
     match order_service::update_order_status(&state.order_repo, &state.product_repo, order_id, payload.status) {
         Ok(order) => (StatusCode::OK, Json(Some(order))),
-        Err(_) => (StatusCode::NOT_FOUND, Json(None)),
+        Err(err) if err == "ORDER_NOT_FOUND" => (StatusCode::NOT_FOUND, Json(None)),
+        Err(_) => (StatusCode::BAD_REQUEST, Json(None)),
     }
 }
 
