@@ -42,8 +42,8 @@ async fn main() {
         .route("/health", get(|| async { "OK" }))
         .merge(product_routes())
         .merge(order_routes())
-        .layer(middleware::from_fn(cors_headers))
-        .layer(middleware::from_fn(log_requests))
+        .layer(middleware::from_fn(cors_headers)) /* Adds CORS headers to all responses */
+        .layer(middleware::from_fn(log_requests)) /* Logs all incoming requests, use for debugging */
         .with_state(state);
 
     println!("Server running at http://localhost:3001");
@@ -52,6 +52,7 @@ async fn main() {
     axum::serve(listener, app).await.unwrap();
 }
 
+/* Logs all incoming requests for debugging purposes, also a way to check the response time */
 async fn log_requests(req: Request, next: Next) -> Response {
     let method = req.method().clone();
     let path = req.uri().path().to_string();
@@ -70,6 +71,7 @@ async fn log_requests(req: Request, next: Next) -> Response {
     response
 }
 
+/* Adds CORS headers to all responses */
 async fn cors_headers(req: Request, next: Next) -> Response {
     if req.method() == Method::OPTIONS {
         let mut response = StatusCode::NO_CONTENT.into_response();

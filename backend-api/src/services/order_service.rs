@@ -9,6 +9,8 @@ pub struct CreateOrderItemInput {
     pub quantity: i32,
 }
 
+/* Helper Functions */
+/* Merges duplicate order items and validates the input */
 fn merge_order_inputs(items: Vec<CreateOrderItemInput>) -> Result<Vec<CreateOrderItemInput>, String> {
     if items.is_empty() {
         return Err("EMPTY_ORDER_ITEMS".into());
@@ -30,6 +32,7 @@ fn merge_order_inputs(items: Vec<CreateOrderItemInput>) -> Result<Vec<CreateOrde
     Ok(merged)
 }
 
+/* Reserves stock for a list of order items */
 fn reserve_stock_for_items(
     product_repo: &ProductRepo,
     items: &[CreateOrderItemInput],
@@ -51,6 +54,7 @@ fn reserve_stock_for_items(
     Ok(())
 }
 
+/* Releases stock for a list of order items */
 fn release_stock_for_order_items(product_repo: &ProductRepo, items: &[OrderItem]) -> Result<(), String> {
     for item in items {
         increase_stock(product_repo, item.product_id, item.quantity)?;
@@ -58,6 +62,7 @@ fn release_stock_for_order_items(product_repo: &ProductRepo, items: &[OrderItem]
     Ok(())
 }
 
+/* Reserves stock for a list of order items */
 fn reserve_stock_for_order_items(product_repo: &ProductRepo, items: &[OrderItem]) -> Result<(), String> {
     let mut reserved: Vec<(Uuid, i32)> = Vec::new();
 
